@@ -1,0 +1,171 @@
+---
+title: "Pengenalan Express.js dan Setup Project"
+---
+
+**Express.js** adalah framework web minimalis dan fleksibel untuk Node.js yang
+mempermudah pembuatan aplikasi backend. Framework ini menjadi pilihan utama
+developer profesional karena membuat proses development menjadi lebih efisien
+dan terstruktur.
+
+## Memahami Backend dan Server
+
+**Backend** adalah "otak" di balik layar sebuah website yang menangani logika
+bisnis dan penyimpanan data. Komponen backend terdiri dari server (komputer yang
+berjalan 24/7), aplikasi backend (kode yang memproses permintaan), dan database
+untuk menyimpan data.
+
+**Server** bertugas mendengarkan setiap permintaan yang datang dari klien
+(browser) dan mengirimkan kembali respons yang diminta, seperti halaman web,
+gambar, atau data JSON.
+
+## Node.js vs Express.js
+
+**Node.js** adalah runtime environment JavaScript yang serbaguna dan dapat
+digunakan untuk berbagai keperluan, mulai dari membuat website hingga aplikasi
+desktop seperti VS Code. Namun, karena sifatnya yang general-purpose, Node.js
+memerlukan banyak kode boilerplate untuk membuat backend web.
+
+**Express.js** hadir sebagai solusi dengan menyediakan abstraksi dan fitur-fitur
+khusus untuk web development. Perbandingannya seperti ini:
+
+- Membangun backend dengan **Node.js murni** seperti menulis resep kue dari
+  nol - setiap langkah harus ditulis secara detail, hasilnya kode menjadi
+  panjang dan rumit
+- Membangun backend dengan **Express.js** seperti menggunakan buku resep yang
+  sudah jadi - Express menyediakan cetakan dasar dan alat siap pakai, sehingga
+  developer tinggal fokus pada logika bisnis
+
+## Keuntungan Menggunakan Express.js
+
+Express.js memberikan beberapa keuntungan signifikan untuk web development:
+
+- **Kode lebih rapi dan mudah dibaca** - struktur kode lebih terorganisir
+  seperti resep yang sistematis
+- **Menulis kode lebih sedikit** - banyak fitur bawaan yang mengurangi
+  boilerplate code
+- **Fleksibilitas dengan middleware** - sistem middleware seperti balok LEGO
+  yang bisa ditambahkan sesuai kebutuhan untuk menambah fungsionalitas aplikasi
+
+## Setup Project Express.js
+
+Berikut adalah langkah-langkah untuk membuat project Express.js pertama:
+
+### 1. Buat Direktori Project
+
+```bash
+mkdir "express-project"
+cd "express-project"
+```
+
+Gunakan tanda kutip jika nama folder mengandung spasi.
+
+### 2. Buat File Utama
+
+```bash
+touch index.js
+```
+
+File `index.js` akan menjadi entry point aplikasi Express.
+
+### 3. Inisialisasi NPM
+
+```bash
+npm init -y
+```
+
+Flag `-y` membuat proses inisialisasi otomatis tanpa dialog interaktif. Pastikan
+field `main` di `package.json` menunjuk ke `index.js`.
+
+### 4. Install Express
+
+```bash
+npm install express
+```
+
+Perintah ini akan membuat folder `node_modules` dan menambahkan Express sebagai
+dependency di `package.json`.
+
+### 5. Konfigurasi ES6 Modules
+
+Tambahkan konfigurasi berikut di `package.json`:
+
+```json
+{
+  "name": "express-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+```
+
+Properti `"type": "module"` memungkinkan penggunaan sintaks ES6 import/export.
+
+### 6. Tulis Kode Server Dasar
+
+Buat server sederhana di `index.js`:
+
+```javascript
+import express from "express";
+
+const app = express();
+const port = 3000;
+
+app.listen(port, () => {
+  console.log(`Server berjalan pada port ${port}`);
+});
+```
+
+Kode ini mengimpor Express, membuat instance aplikasi, dan menjalankan server di
+port 3000.
+
+## Menjalankan Server
+
+Jalankan server dengan perintah:
+
+```bash
+node index.js
+```
+
+Jika berhasil, akan muncul pesan "Server berjalan pada port 3000" di terminal.
+
+## Mengakses Server via Browser
+
+Buka browser dan akses:
+
+```
+localhost:3000
+```
+
+- **localhost** adalah alamat khusus yang merujuk ke komputer sendiri
+- **:3000** adalah nomor port - seperti "pintu" yang didengarkan oleh server
+  untuk menerima koneksi
+
+Saat pertama kali diakses, browser akan menampilkan pesan "Cannot GET /" karena
+belum ada routing yang didefinisikan. Ini normal dan menandakan server sudah
+berjalan dengan baik.
+
+## Client-Server Communication
+
+Ketika membuka website, terjadi komunikasi antara client dan server:
+
+1. **Client** (browser) mengirimkan request melalui internet
+2. Request diterima oleh **server**
+3. **Aplikasi backend** di server memproses request
+4. Server mengirimkan **response** kembali ke browser
+
+Konsep ini disebut **Client-Side** (frontend yang terlihat di browser) dan
+**Server-Side** (backend yang memproses di belakang layar).
+
+---
+
+**Ringkasan**: Sesi ini memperkenalkan Express.js sebagai framework web untuk
+Node.js yang mempermudah pembuatan backend dengan kode yang lebih bersih dan
+efisien. Setup project mencakup instalasi Express, konfigurasi package.json, dan
+pembuatan server dasar yang siap dikembangkan lebih lanjut dengan routing dan
+middleware.

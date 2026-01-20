@@ -1,0 +1,27 @@
+{
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "es5",
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "jsxSingleQuote": false,
+
+  "overrides": [
+    {
+      "files": ["*.md", "*.mdx"],
+      "options": { "proseWrap": "always" }
+    },
+    {
+      "files": ["*.yml", "*.yaml"],
+      "options": { "tabWidth": 2 }
+    },
+    {
+      "files": ["**/*.test.{js,ts}"],
+      "options": { "singleQuote": true }
+    }
+  ]
+}

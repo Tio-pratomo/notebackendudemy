@@ -1,0 +1,48 @@
+# Menandakan ini adalah file konfigurasi root. Editor tidak akan mencari file .editorconfig
+# di direktori yang lebih tinggi. Ini adalah praktik terbaik untuk proyek.
+root = true
+
+# Aturan universal yang berlaku untuk semua jenis file
+[*]
+# Gunakan newline (lf) sebagai karakter akhir baris. Standar untuk Linux dan macOS.
+end_of_line = lf
+# Gunakan set karakter utf-8 untuk semua file teks.
+charset = utf-8
+# Hapus spasi kosong yang tidak perlu di akhir baris.
+trim_trailing_whitespace = true
+# Pastikan ada satu baris kosong di akhir setiap file.
+insert_final_newline = true
+# Atur gaya indentasi menjadi spasi, bukan tab, untuk konsistensi.
+indent_style = space
+# Anda bisa mengatur panjang baris maksimum, meskipun tidak semua editor mendukungnya.
+# 120 adalah pilihan modern, namun bisa disesuaikan (misalnya 80 atau 100).
+max_line_length = 120
+
+# Aturan untuk file web dan konfigurasi umum (indentasi 2 spasi)
+# Mengelompokkan ekstensi file dengan aturan yang sama membuatnya lebih ringkas.
+[*.{js,jsx,ts,tsx,html,css,scss,less,json,yaml,yml,vue}]
+indent_size = 2
+
+# Aturan spesifik untuk file Python, sesuai standar PEP 8
+[*.py]
+indent_size = 4
+
+# Aturan untuk file XML dan terkait (indentasi 2 spasi)
+[*.{xml,svg,csproj,user,config}]
+indent_size = 2
+
+# Aturan spesifik untuk file Markdown
+[*.md]
+# Jangan hapus spasi di akhir baris, karena dua spasi di akhir
+# baris digunakan untuk membuat 'hard line break'.
+trim_trailing_whitespace = false
+# Beberapa parser Markdown sensitif terhadap baris baru di akhir file.
+insert_final_newline = false
+
+# Aturan untuk file Makefile yang secara sintaksis memerlukan tab
+[Makefile]
+indent_style = tab
+
+# Aturan untuk file skrip Windows (menggunakan CRLF)
+[*.{bat,cmd}]
+end_of_line = crlf

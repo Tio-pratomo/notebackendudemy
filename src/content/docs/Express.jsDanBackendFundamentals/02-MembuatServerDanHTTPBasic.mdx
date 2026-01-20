@@ -1,0 +1,254 @@
+---
+title: "Membuat Server Pertama dan HTTP Basics"
+---
+
+Setelah memahami konsep dasar Express.js, sekarang kita akan membuat server yang
+fungsional dan mempelajari dasar-dasar HTTP protocol yang menjadi fondasi
+komunikasi web.
+
+## HTTP: Bahasa Komunikasi Internet
+
+**HTTP** (HyperText Transfer Protocol) adalah protokol atau "bahasa" yang
+digunakan komputer untuk berkomunikasi di internet. Sama seperti manusia
+membutuhkan bahasa untuk berkomunikasi, komputer menggunakan HTTP untuk saling
+memahami.
+
+### HTTP Methods: Kata Kunci dalam HTTP
+
+Ada lima HTTP methods utama yang perlu dipahami:
+
+**GET** - Mengambil atau meminta resource dari server. Seperti mengatakan
+"Tolong berikan saya..." ke server. Ketika browser menampilkan pesan "Cannot GET
+/", artinya browser mencoba mengambil halaman utama tetapi server belum tahu
+harus memberikan apa.
+
+**POST** - Mengirimkan data baru ke server. Digunakan saat mengisi formulir
+pendaftaran atau login, data email dan password akan dikirim menggunakan
+permintaan POST.
+
+**PUT** - Mengganti atau memperbarui seluruh resource. Seperti mengganti sepeda
+rusak dengan sepeda baru secara keseluruhan.
+
+**PATCH** - Memperbarui sebagian kecil resource. Seperti hanya mengganti ban
+sepeda yang rusak, tidak perlu mengganti seluruh sepeda.
+
+**DELETE** - Menghapus resource dari server. Method ini paling jelas fungsinya
+untuk menghapus data.
+
+## Membuat Server yang Merespons GET Request
+
+Mari kita upgrade server dari sesi sebelumnya, agar bisa merespons permintaan
+GET dengan benar. Update file `index.js`:
+
+```javascript
+import express from "express";
+
+const app = express();
+const port = 3000;
+
+// Route untuk halaman utama
+app.get("/", (req, res) => {
+  res.send("<h1>Halo Dunia!</h1>");
+});
+
+app.listen(port, () => {
+  console.log(`Server berjalan pada port ${port}`);
+});
+```
+
+Kode `app.get()` memberitahu server bagaimana merespons permintaan GET ke alamat
+tertentu. Ketika ada permintaan ke `/` (halaman utama), server akan mengirimkan
+teks "Halo Dunia!" dalam bentuk heading HTML.
+
+Setelah menyimpan perubahan dan menjalankan `node index.js`, buka
+`localhost:3000` di browser - sekarang akan muncul "Halo Dunia!" bukan lagi
+pesan error.
+
+## Endpoint: Alamat Spesifik di Website
+
+**Endpoint** adalah alamat spesifik di dalam website, seperti nomor ruangan di
+sebuah gedung. Tanda garis miring `/` yang kita gunakan di `app.get("/")` adalah
+endpoint untuk halaman utama.
+
+Website biasanya memiliki banyak halaman dengan endpoint berbeda:
+
+```javascript
+import express from "express";
+
+const app = express();
+const port = 3000;
+
+app.get("/", (req, res) => {
+  res.send("<h1>Ini Halaman Utama Kita!</h1>");
+});
+
+app.get("/about", (req, res) => {
+  res.send("<h1>Tentang Saya</h1><p>Saya seorang pengembang web pemula.</p>");
+});
+
+app.get("/contact", (req, res) => {
+  res.send("<h1>Hubungi Saya</h1><p>Email: contoh@email.com</p>");
+});
+
+app.listen(port, () => {
+  console.log(`Server berjalan pada port ${port}`);
+});
+```
+
+Sekarang server bisa merespons tiga endpoint berbeda:
+
+- `localhost:3000` - halaman utama
+- `localhost:3000/about` - halaman tentang
+- `localhost:3000/contact` - halaman kontak
+
+## Nodemon: Auto-Restart Server
+
+Setiap kali mengubah kode server, kita harus menghentikan server (Ctrl + C) dan
+menjalankannya lagi dengan `node index.js`. Ini sangat merepotkan dalam proses
+development.
+
+**Nodemon** adalah tool yang secara otomatis me-restart server setiap kali ada
+perubahan file. Ini membuat workflow development jauh lebih efisien.
+
+### Instalasi Nodemon
+
+**Global installation** (bisa digunakan di semua project):
+
+```bash
+npm install -g nodemon
+```
+
+**Local installation** (hanya untuk project ini):
+
+```bash
+npm install --save-dev nodemon
+```
+
+### Menggunakan Nodemon
+
+Untuk menjalankan server dengan nodemon:
+
+```bash
+nodemon index.js
+```
+
+Atau tanpa instalasi menggunakan npx:
+
+```bash
+npx nodemon index.js
+```
+
+Setelah nodemon berjalan, setiap kali menyimpan perubahan file, server akan
+otomatis restart dan menampilkan pesan di terminal. Sekarang kita bisa fokus
+coding tanpa perlu restart manual.
+
+### Konfigurasi Script di package.json
+
+Untuk mempermudah, tambahkan script di `package.json`:
+
+```json
+{
+  "name": "express-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+```
+
+Sekarang bisa menjalankan:
+
+- `npm start` - untuk production
+- `npm run dev` - untuk development dengan nodemon
+
+## Memahami Port dan Localhost
+
+**localhost** adalah alamat khusus yang merujuk ke komputer sendiri. Saat
+mengetik `localhost` di browser, browser mencari server di komputer lokal, bukan
+di internet.
+
+**Port** adalah nomor "pintu" yang digunakan server untuk menerima koneksi.
+Sebuah server bisa memiliki banyak port untuk berbagai keperluan:
+
+- Port 80: HTTP standard
+- Port 443: HTTPS standard
+- Port 3000: Common untuk development Node.js
+- Port 8080: Alternative development port
+
+**Dalam development, kita bebas memilih port yang tidak digunakan aplikasi
+lain**. Port **3000** adalah konvensi umum untuk aplikasi Node.js/Express.
+
+```javascript
+const port = 3000; // Bisa diganti 3001, 8080, dll
+
+app.listen(port, () => {
+  console.log(`Server berjalan pada port ${port}`);
+});
+```
+
+## Request-Response Cycle
+
+Setiap interaksi web mengikuti pola request-response:
+
+1. **Client** (browser) mengirimkan HTTP request ke server
+2. **Server** menerima dan memproses request
+3. **Server** mengirimkan HTTP response kembali ke client
+4. **Browser** menampilkan response ke user
+
+Dalam Express, kita menggunakan dua parameter utama:
+
+- `req` (request) - berisi informasi tentang permintaan dari client
+- `res` (response) - digunakan untuk mengirim balasan ke client
+
+```javascript
+app.get("/", (req, res) => {
+  // req: informasi dari client
+  // res: untuk mengirim balasan
+  res.send("Hello!");
+});
+```
+
+## Latihan Praktis
+
+Coba buat server dengan routing berikut:
+
+```javascript
+import express from "express";
+
+const app = express();
+const port = 3000;
+
+app.get("/", (req, res) => {
+  res.send("<h1>Welcome to My Server</h1>");
+});
+
+app.get("/api/data", (req, res) => {
+  res.send({ message: "This is API endpoint", timestamp: new Date() });
+});
+
+app.get("/user/profile", (req, res) => {
+  res.send("<h2>User Profile Page</h2><p>Username: johndoe</p>");
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
+```
+
+Jalankan dengan nodemon dan test setiap endpoint di browser.
+
+---
+
+**Ringkasan**: Sesi ini mengajarkan cara membuat server Express yang fungsional
+dengan routing dasar, memahami HTTP methods (GET, POST, PUT, PATCH, DELETE),
+menggunakan nodemon untuk auto-restart, dan memahami konsep endpoint, port, dan
+localhost dalam konteks web development.

@@ -1,0 +1,485 @@
+---
+title: "Custom middleware dan Morgan Logger"
+---
+
+Setelah memahami konsep dasar middleware, sekarang kita akan belajar membuat middleware custom sendiri dan menggunakan Morgan untuk logging HTTP requests yang lebih profesional. Kemampuan membuat custom middleware adalah skill penting yang membedakan developer pemula dengan yang berpengalaman.
+
+## Membuat Custom Middleware
+
+Custom middleware adalah fungsi yang kita buat sendiri untuk kebutuhan spesifik aplikasi. Middleware custom memiliki struktur yang sama dengan middleware built-in: menerima tiga parameter (req, res, next).
+
+### Contoh Custom Logger Middleware
+
+```javascript
+import express from 'express';
+const app = express();
+
+// Custom logger middleware
+const logger = (req, res, next) => {
+    console.log('--- LOG KUSTOM ---');
+    console.log('Metode Permintaan:', req.method);
+    console.log('URL Permintaan:', req.url);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('------------------');
+    next(); // PENTING: panggil next() untuk melanjutkan
+};
+
+// Gunakan middleware custom
+app.use(logger);
+
+app.get('/', (req, res) => {
+    res.send('Halaman Utama');
+});
+
+app.post('/data', (req, res) => {
+    res.send('Data diterima');
+});
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+});
+```
+
+**Penting**: Middleware akan dieksekusi untuk setiap request yang masuk, jadi pastikan untuk selalu memanggil `next()` agar request bisa dilanjutkan ke handler berikutnya.
+
+## Morgan: Logger Middleware Profesional
+
+**Morgan** adalah middleware populer untuk logging HTTP request secara otomatis dan terstruktur. Morgan seperti penjaga gerbang yang sangat rajin mencatat semua detail tamu yang datang: kapan datang, mau apa, bagaimana hasilnya, dan berapa lama prosesnya.
+
+### Instalasi Morgan
+
+```bash
+npm install morgan
+```
+
+### Menggunakan Morgan
+
+```javascript
+import express from 'express';
+import morgan from 'morgan';
+
+const app = express();
+const port = 3000;
+
+// Gunakan Morgan dengan format 'dev'
+app.use(morgan('dev'));
+
+app.get('/', (req, res) => {
+    res.send('Halo dari Halaman Utama!');
+});
+
+app.post('/submit', (req, res) => {
+    res.send('Data berhasil dikirim!');
+});
+
+app.listen(port, () => {
+    console.log(`Server berjalan di http://localhost:${port}`);
+});
+```
+
+### Format Log Morgan
+
+Morgan menyediakan beberapa format preset yang bisa dipilih sesuai kebutuhan:
+
+**dev** - Format untuk development dengan warna di terminal:
+```
+GET / 200 5.123 ms - 18
+POST /submit 200 10.456 ms - 25
+GET /notfound 404 2.234 ms - 150
+```
+
+**tiny** - Format paling ringkas:
+```
+GET / 200 18 - 5.123 ms
+```
+
+**short** - Format sedang:
+```
+::1 - GET / HTTP/1.1 200 18 - 5.123 ms
+```
+
+**common** - Format Apache style:
+```
+::1 - - [13/Nov/2025:10:11:23 +0000] "GET / HTTP/1.1" 200 18
+```
+
+**combined** - Format paling detail (untuk production):
+```
+::1 - - [13/Nov/2025:10:11:23 +0000] "GET / HTTP/1.1" 200 18 "-" "Mozilla/5.0..."
+```
+
+### Custom Format Morgan
+
+Kita juga bisa membuat format custom:
+
+```javascript
+import morgan from 'morgan';
+
+// Custom format
+morgan.token('custom-time', (req, res) => {
+    return new Date().toLocaleString('id-ID');
+});
+
+app.use(morgan(':custom-time :method :url :status :response-time ms'));
+
+// Output: 13/11/2025, 10:11:23 GET / 200 5.123 ms
+```
+
+## Middleware untuk Authentication
+
+Authentication middleware sangat umum digunakan untuk melindungi route tertentu.
+
+### Simple Token Authentication
+
+```javascript
+import express from 'express';
+const app = express();
+
+// Middleware authentication
+const authenticate = (req, res, next) => {
+    const token = req.headers.authorization;
+    
+    // Cek apakah token valid
+    if (token === 'Bearer secret-token-123') {
+        console.log('User authenticated');
+        // Tambahkan user info ke request
+        req.user = { id: 1, name: 'John Doe', role: 'admin' };
+        next(); // Lanjutkan ke route handler
+    } else {
+        // Token tidak valid, kirim error
+        res.status(401).json({ 
+            error: 'Unauthorized',
+            message: 'Invalid or missing token' 
+        });
+        // TIDAK memanggil next()
+    }
+};
+
+// Route publik (tanpa authentication)
+app.get('/', (req, res) => {
+    res.send('Public Home Page');
+});
+
+// Route protected (dengan authentication)
+app.get('/dashboard', authenticate, (req, res) => {
+    res.send(`Welcome ${req.user.name} to Dashboard`);
+});
+
+app.get('/admin', authenticate, (req, res) => {
+    if (req.user.role === 'admin') {
+        res.send('Admin Panel');
+    } else {
+        res.status(403).json({ error: 'Forbidden' });
+    }
+});
+
+app.listen(3000);
+```
+
+### Role-Based Access Control (RBAC)
+
+```javascript
+// Middleware untuk check role
+const checkRole = (allowedRoles) => {
+    return (req, res, next) => {
+        // Asumsi req.user sudah diset oleh authenticate middleware
+        if (!req.user) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        if (allowedRoles.includes(req.user.role)) {
+            next(); // Role sesuai, lanjutkan
+        } else {
+            res.status(403).json({ 
+                error: 'Forbidden',
+                message: 'You do not have permission' 
+            });
+        }
+    };
+};
+
+// Gunakan dengan multiple roles
+app.get('/admin', 
+    authenticate, 
+    checkRole(['admin']), 
+    (req, res) => {
+        res.send('Admin Panel');
+    }
+);
+
+app.get('/editor', 
+    authenticate, 
+    checkRole(['admin', 'editor']), 
+    (req, res) => {
+        res.send('Editor Panel');
+    }
+);
+```
+
+## Error Handling Middleware
+
+Error handling middleware adalah jenis khusus yang memiliki **4 parameter** (err, req, res, next) dan harus ditempatkan setelah semua route.
+
+### Basic Error Handler
+
+```javascript
+import express from 'express';
+const app = express();
+
+// Regular routes
+app.get('/', (req, res) => {
+    res.send('Home');
+});
+
+app.get('/error', (req, res) => {
+    // Simulasi error
+    throw new Error('Something went wrong!');
+});
+
+// Error handling middleware (4 parameters!)
+app.use((err, req, res, next) => {
+    console.error('Error occurred:', err.message);
+    console.error(err.stack);
+    
+    res.status(err.status || 500).json({
+        error: 'Internal Server Error',
+        message: err.message,
+        // Tampilkan stack hanya di development
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+});
+
+app.listen(3000);
+```
+
+### Custom Error Class
+
+```javascript
+// CustomError.js
+class CustomError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+export default CustomError;
+```
+
+```javascript
+// app.js
+import express from 'express';
+import CustomError from './CustomError.js';
+
+const app = express();
+
+app.get('/user/:id', (req, res, next) => {
+    const userId = req.params.id;
+    
+    if (userId !== '123') {
+        // Pass error ke error handler
+        return next(new CustomError('User not found', 404));
+    }
+    
+    res.json({ id: userId, name: 'John' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
+    
+    res.status(statusCode).json({
+        success: false,
+        status: statusCode,
+        message: message,
+        ...(process.env.NODE_ENV === 'development' && { 
+            stack: err.stack 
+        })
+    });
+});
+
+app.listen(3000);
+```
+
+### Async Error Handling
+
+Untuk async functions, kita perlu wrap dengan try-catch atau menggunakan helper:
+
+```javascript
+// asyncHandler.js
+const asyncHandler = (fn) => {
+    return (req, res, next) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
+};
+
+export default asyncHandler;
+```
+
+```javascript
+import asyncHandler from './asyncHandler.js';
+
+// Gunakan asyncHandler untuk route async
+app.get('/users', asyncHandler(async (req, res) => {
+    // Simulasi database query
+    const users = await db.query('SELECT * FROM users');
+    res.json(users);
+}));
+
+// Error akan otomatis di-catch dan dikirim ke error handler
+```
+
+## Urutan Middleware yang Benar
+
+Urutan penempatan middleware sangat krusial:
+
+```javascript
+import express from 'express';
+import morgan from 'morgan';
+
+const app = express();
+
+// 1. Logger (paling awal untuk mencatat semua request)
+app.use(morgan('dev'));
+
+// 2. Built-in middleware untuk parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 3. Static files
+app.use(express.static('public'));
+
+// 4. Custom middleware global
+app.use((req, res, next) => {
+    req.requestTime = new Date().toISOString();
+    next();
+});
+
+// 5. Route definitions
+app.get('/', (req, res) => {
+    res.send('Home');
+});
+
+app.post('/data', (req, res) => {
+    res.json(req.body);
+});
+
+// 6. 404 handler (setelah semua routes)
+app.use((req, res) => {
+    res.status(404).json({ 
+        error: 'Not Found',
+        message: `Route ${req.url} does not exist` 
+    });
+});
+
+// 7. Error handler (paling akhir, 4 parameters)
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        error: 'Internal Server Error',
+        message: err.message 
+    });
+});
+
+app.listen(3000);
+```
+
+## Best Practices Middleware
+
+**Do's**:
+- Selalu panggil `next()` kecuali mengirim response
+- Tempatkan error handler di akhir dengan 4 parameter
+- Gunakan Morgan untuk logging HTTP requests
+- Pisahkan logic authentication ke middleware terpisah
+- Wrap async route handlers dengan error handler
+
+**Don'ts**:
+- Jangan lupa memanggil `next()` jika tidak mengirim response
+- Jangan tempatkan error handler di tengah aplikasi
+- Jangan hardcode sensitive data di middleware
+- Jangan gunakan `console.log` untuk production logging
+
+## Latihan Praktis
+
+Buat aplikasi dengan multiple middleware:
+
+```javascript
+import express from 'express';
+import morgan from 'morgan';
+
+const app = express();
+const port = 3000;
+
+// Logger
+app.use(morgan('dev'));
+
+// Body parser
+app.use(express.json());
+
+// Request counter
+let requestCount = 0;
+app.use((req, res, next) => {
+    requestCount++;
+    req.requestCount = requestCount;
+    next();
+});
+
+// Request timing
+app.use((req, res, next) => {
+    req.startTime = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - req.startTime;
+        console.log(`Request #${req.requestCount} took ${duration}ms`);
+    });
+    next();
+});
+
+// Auth middleware
+const apiKeyAuth = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey === 'secret-key-123') {
+        next();
+    } else {
+        res.status(401).json({ error: 'Invalid API key' });
+    }
+};
+
+// Public route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Public endpoint',
+        requestNumber: req.requestCount 
+    });
+});
+
+// Protected route
+app.get('/api/data', apiKeyAuth, (req, res) => {
+    res.json({ 
+        data: [1, 2, 3, 4, 5],
+        requestNumber: req.requestCount 
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not Found' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Server Error' });
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
+```
+
+***
+
+**Ringkasan**: Sesi ini mengajarkan cara membuat custom middleware untuk kebutuhan spesifik aplikasi, menggunakan Morgan untuk HTTP logging profesional, implementasi authentication dan authorization middleware, serta error handling middleware dengan 4 parameter yang ditempatkan di akhir aplikasi. Urutan middleware sangat penting: logger → parsers → custom middleware → routes → 404 handler → error handler.
+

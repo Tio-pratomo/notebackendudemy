@@ -1,0 +1,705 @@
+---
+title: "Server-Side Requests dengan Axios"
+---
+
+Setelah memahami API fundamentals dan authentication di sesi sebelumnya, sekarang kita akan belajar bagaimana membuat HTTP requests dari server Express.js ke external APIs menggunakan **Axios**. Axios adalah HTTP client library yang powerful dan mudah digunakan untuk Node.js dan browser.
+
+## Mengapa Axios?
+
+Node.js memiliki built-in module `https` untuk membuat HTTP requests, tetapi syntaxnya kompleks dan memerlukan banyak kode boilerplate. Axios menyederhanakan proses ini dengan API yang lebih intuitif dan fitur-fitur modern.
+
+### Perbandingan: Native HTTPS vs Axios
+
+**Menggunakan Native HTTPS Module**:
+
+```javascript
+const https = require("https");
+
+const options = {
+  hostname: "api.example.com",
+  port: 443,
+  path: "/data",
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
+
+const req = https.request(options, (res) => {
+  let data = "";
+
+  // Menggabungkan chunks data
+  res.on("data", (chunk) => {
+    data += chunk;
+  });
+
+  // Ketika semua data diterima
+  res.on("end", () => {
+    const parsedData = JSON.parse(data);
+    console.log(parsedData);
+  });
+});
+
+req.on("error", (error) => {
+  console.error("Error:", error);
+});
+
+req.end(); // WAJIB dipanggil!
+```
+
+**Menggunakan Axios** (jauh lebih sederhana):
+
+```javascript
+import axios from "axios";
+
+try {
+  const response = await axios.get("https://api.example.com/data");
+  console.log(response.data);
+} catch (error) {
+  console.error("Error:", error.message);
+}
+```
+
+**Keuntungan Axios**:
+
+- Syntax yang lebih clean dan readable
+- Automatic JSON parsing
+- Promise-based (mendukung async/await)
+- Automatic error handling
+- Request/response interceptors
+- Request cancellation support
+- Timeout configuration
+- Browser dan Node.js compatible
+
+## Instalasi Axios
+
+### Setup Project
+
+```bash
+mkdir axios-practice
+cd axios-practice
+npm init -y
+npm install axios express
+```
+
+### Konfigurasi package.json
+
+```json
+{
+  "name": "axios-practice",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.2"
+  }
+}
+```
+
+## GET Requests dengan Axios
+
+GET requests digunakan untuk mengambil data dari API.
+
+### Basic GET Request
+
+```javascript
+import axios from "axios";
+
+// Simple GET request
+async function getUsers() {
+  try {
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/users"
+    );
+    console.log("Status:", response.status);
+    console.log("Data:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}
+
+getUsers();
+```
+
+### GET Request dengan Query Parameters
+
+```javascript
+async function searchUsers(username) {
+  try {
+    const response = await axios.get("https://api.github.com/search/users", {
+      params: {
+        q: username,
+        per_page: 10,
+        sort: "followers",
+      },
+    });
+
+    console.log(`Found ${response.data.total_count} users`);
+    return response.data.items;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}
+
+searchUsers("john");
+```
+
+### GET Request dengan Headers
+
+```javascript
+async function getWeather(city, apiKey) {
+  try {
+    const response = await axios.get(
+      "https://api.openweathermap.org/data/2.5/weather",
+      {
+        params: {
+          q: city,
+          appid: apiKey,
+          units: "metric",
+        },
+        headers: {
+          "User-Agent": "MyWeatherApp/1.0",
+          "Accept-Language": "id-ID",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("API Error:", error.response.status, error.response.data);
+    } else {
+      console.error("Network Error:", error.message);
+    }
+    throw error;
+  }
+}
+```
+
+## POST Requests dengan Axios
+
+POST requests digunakan untuk mengirim data ke API untuk membuat resource baru.
+
+### Basic POST Request
+
+```javascript
+async function createUser(userData) {
+  try {
+    const response = await axios.post(
+      "https://jsonplaceholder.typicode.com/users",
+      {
+        name: userData.name,
+        email: userData.email,
+        username: userData.username,
+      }
+    );
+
+    console.log("User created:", response.data);
+    console.log("Status:", response.status); // 201 Created
+    return response.data;
+  } catch (error) {
+    console.error("Error creating user:", error.message);
+    throw error;
+  }
+}
+
+createUser({
+  name: "John Doe",
+  email: "john@example.com",
+  username: "johndoe",
+});
+```
+
+### POST Request dengan Headers dan Authentication
+
+```javascript
+async function createPost(postData, authToken) {
+  try {
+    const response = await axios.post(
+      "https://api.example.com/posts",
+      {
+        title: postData.title,
+        content: postData.content,
+        tags: postData.tags,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error:", error.response?.data || error.message);
+    throw error;
+  }
+}
+```
+
+## PUT dan PATCH Requests
+
+PUT digunakan untuk update seluruh resource, PATCH untuk update sebagian.
+
+### PUT Request (Full Update)
+
+```javascript
+async function updateUser(userId, userData) {
+  try {
+    const response = await axios.put(
+      `https://jsonplaceholder.typicode.com/users/${userId}`,
+      {
+        id: userId,
+        name: userData.name,
+        email: userData.email,
+        username: userData.username,
+        phone: userData.phone,
+        website: userData.website,
+      }
+    );
+
+    console.log("User updated:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error.message);
+    throw error;
+  }
+}
+```
+
+### PATCH Request (Partial Update)
+
+```javascript
+async function updateUserEmail(userId, newEmail) {
+  try {
+    const response = await axios.patch(
+      `https://jsonplaceholder.typicode.com/users/${userId}`,
+      {
+        email: newEmail,
+      }
+    );
+
+    console.log("Email updated:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}
+```
+
+## DELETE Requests
+
+DELETE requests digunakan untuk menghapus resource dari API.
+
+```javascript
+async function deleteUser(userId) {
+  try {
+    const response = await axios.delete(
+      `https://jsonplaceholder.typicode.com/users/${userId}`
+    );
+
+    console.log("User deleted. Status:", response.status); // 200 or 204
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting user:", error.message);
+    throw error;
+  }
+}
+
+deleteUser(1);
+```
+
+## Response Object Structure
+
+Axios response object memiliki struktur standar:
+
+```javascript
+{
+    data: {},           // Response body dari server
+    status: 200,        // HTTP status code
+    statusText: 'OK',   // HTTP status message
+    headers: {},        // Response headers
+    config: {},         // Request configuration
+    request: {}         // Original request object
+}
+```
+
+**Contoh mengakses response**:
+
+```javascript
+const response = await axios.get("https://api.example.com/data");
+
+console.log(response.data); // Actual data
+console.log(response.status); // 200
+console.log(response.statusText); // 'OK'
+console.log(response.headers); // { 'content-type': 'application/json', ... }
+```
+
+## Error Handling dengan Axios
+
+Axios membedakan error menjadi beberapa kategori yang perlu ditangani berbeda.
+
+### Comprehensive Error Handling
+
+```javascript
+async function fetchDataWithErrorHandling(url) {
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      // Server merespons dengan status code di luar 2xx
+      console.error("Server Error:");
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      console.error("Headers:", error.response.headers);
+
+      if (error.response.status === 404) {
+        throw new Error("Resource not found");
+      } else if (error.response.status === 401) {
+        throw new Error("Unauthorized - check your credentials");
+      } else if (error.response.status >= 500) {
+        throw new Error("Server error - try again later");
+      }
+    } else if (error.request) {
+      // Request dibuat tapi tidak ada response
+      console.error("Network Error - No response received");
+      console.error("Request:", error.request);
+      throw new Error("Network error - check your connection");
+    } else {
+      // Error saat setup request
+      console.error("Request Setup Error:", error.message);
+      throw error;
+    }
+  }
+}
+```
+
+## Axios Configuration dan Options
+
+### Global Configuration
+
+```javascript
+import axios from "axios";
+
+// Set base URL untuk semua requests
+axios.defaults.baseURL = "https://api.example.com";
+
+// Set default headers
+axios.defaults.headers.common["Authorization"] = "Bearer token123";
+axios.defaults.headers.post["Content-Type"] = "application/json";
+
+// Set timeout default
+axios.defaults.timeout = 5000; // 5 seconds
+
+// Sekarang requests bisa lebih singkat
+const response = await axios.get("/users"); // Will use baseURL
+```
+
+### Creating Custom Instance
+
+```javascript
+const apiClient = axios.create({
+  baseURL: "https://api.example.com",
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+    "X-Custom-Header": "custom-value",
+  },
+});
+
+// Use custom instance
+const response = await apiClient.get("/users");
+```
+
+### Request-Specific Configuration
+
+```javascript
+const response = await axios.get("/data", {
+  timeout: 3000, // 3 seconds timeout
+  responseType: "json", // Expected response type
+  maxRedirects: 5, // Max redirects to follow
+  params: {
+    // Query parameters
+    page: 1,
+    limit: 10,
+  },
+  headers: {
+    // Custom headers
+    "X-Request-ID": "12345",
+  },
+  validateStatus: (status) => {
+    // Custom status validation
+    return status >= 200 && status < 300;
+  },
+});
+```
+
+## Axios Interceptors
+
+Interceptors memungkinkan kita memodifikasi request sebelum dikirim atau response sebelum diterima.
+
+### Request Interceptor
+
+```javascript
+// Add request interceptor
+apiClient.interceptors.request.use(
+  (config) => {
+    // Modify config sebelum request dikirim
+    console.log(
+      `Making ${config.method.toUpperCase()} request to ${config.url}`
+    );
+
+    // Add timestamp to all requests
+    config.headers["X-Request-Time"] = new Date().toISOString();
+
+    // Add auth token from storage
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    // Handle request error
+    console.error("Request error:", error);
+    return Promise.reject(error);
+  }
+);
+```
+
+### Response Interceptor
+
+```javascript
+// Add response interceptor
+apiClient.interceptors.response.use(
+  (response) => {
+    // Transform response data
+    console.log(`Response received from ${response.config.url}`);
+
+    // Log response time
+    const requestTime = response.config.headers["X-Request-Time"];
+    const responseTime = new Date().toISOString();
+    console.log("Response time:", responseTime);
+
+    return response;
+  },
+  async (error) => {
+    // Handle response error
+    const originalRequest = error.config;
+
+    // Retry on 401 (token expired)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        // Refresh token
+        const newToken = await refreshAuthToken();
+        localStorage.setItem("authToken", newToken);
+
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Redirect to login
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+```
+
+## Integrasi Axios dengan Express.js
+
+Sekarang mari kita integrasikan Axios dengan Express server untuk membuat API proxy atau aggregator.
+
+### Basic API Proxy Server
+
+```javascript
+import express from "express";
+import axios from "axios";
+
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+
+// API proxy endpoint
+app.get("/api/weather/:city", async (req, res) => {
+  const city = req.params.city;
+  const apiKey = process.env.WEATHER_API_KEY;
+
+  try {
+    const response = await axios.get(
+      "https://api.openweathermap.org/data/2.5/weather",
+      {
+        params: {
+          q: city,
+          appid: apiKey,
+          units: "metric",
+          lang: "id",
+        },
+      }
+    );
+
+    // Transform dan kirim data
+    res.json({
+      city: response.data.name,
+      temperature: response.data.main.temp,
+      description: response.data.weather[0].description,
+      humidity: response.data.main.humidity,
+      windSpeed: response.data.wind.speed,
+    });
+  } catch (error) {
+    if (error.response) {
+      res.status(error.response.status).json({
+        error: "Weather API error",
+        message: error.response.data.message,
+      });
+    } else {
+      res.status(500).json({
+        error: "Server error",
+        message: error.message,
+      });
+    }
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+```
+
+### API Aggregator (Multiple APIs)
+
+```javascript
+app.get("/api/user-dashboard/:username", async (req, res) => {
+  const username = req.params.username;
+
+  try {
+    // Fetch data dari multiple APIs secara parallel
+    const [githubData, twitterData, linkedinData] = await Promise.all([
+      axios.get(`https://api.github.com/users/${username}`),
+      axios.get(`https://api.twitter.com/users/${username}`),
+      axios.get(`https://api.linkedin.com/users/${username}`),
+    ]);
+
+    // Aggregate data
+    res.json({
+      username: username,
+      github: {
+        repos: githubData.data.public_repos,
+        followers: githubData.data.followers,
+      },
+      twitter: {
+        followers: twitterData.data.followers_count,
+        tweets: twitterData.data.tweets_count,
+      },
+      linkedin: {
+        connections: linkedinData.data.connections,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to aggregate user data",
+      message: error.message,
+    });
+  }
+});
+```
+
+## Practical Example: Random Activity Generator
+
+```javascript
+import express from "express";
+import axios from "axios";
+
+const app = express();
+const port = 3000;
+
+// Create axios instance dengan configuration
+const boredAPI = axios.create({
+  baseURL: "https://bored-api.appbrewery.com",
+  timeout: 5000,
+});
+
+app.get("/random-activity", async (req, res) => {
+  try {
+    const response = await boredAPI.get("/random");
+
+    res.json({
+      activity: response.data.activity,
+      type: response.data.type,
+      participants: response.data.participants,
+      price: response.data.price,
+      accessibility: response.data.accessibility,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to fetch activity",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/activity/:type", async (req, res) => {
+  const type = req.params.type;
+
+  try {
+    const response = await boredAPI.get("/filter", {
+      params: { type: type },
+    });
+
+    const activities = response.data;
+    const randomActivity =
+      activities[Math.floor(Math.random() * activities.length)];
+
+    res.json(randomActivity);
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to fetch activity by type",
+      message: error.message,
+    });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
+```
+
+## Best Practices
+
+**Use async/await**: Lebih readable daripada promises dengan `.then()` chains.
+
+**Implement proper error handling**: Selalu catch errors dan handle berbagai error scenarios.
+
+**Use environment variables**: Simpan API keys dan sensitive data di `.env` file.
+
+**Set timeouts**: Prevent hanging requests dengan set reasonable timeouts.
+
+**Use interceptors**: Untuk cross-cutting concerns seperti authentication, logging, error handling.
+
+**Create custom instances**: Untuk different APIs dengan different configurations.
+
+**Handle rate limiting**: Implement retry logic dengan exponential backoff.
+
+**Cache responses**: Untuk data yang jarang berubah, implement caching strategy.
+
+---
+
+**Ringkasan**: Axios adalah HTTP client library yang menyederhanakan server-side requests dengan syntax yang clean, automatic JSON parsing, dan built-in error handling. Mendukung semua HTTP methods (GET, POST, PUT, PATCH, DELETE) dengan async/await pattern untuk asynchronous operations. Features seperti interceptors, custom instances, dan flexible configuration membuat Axios ideal untuk complex API integrations. Integrasi dengan Express.js memungkinkan pembuatan API proxies dan aggregators yang powerful untuk mengkonsumsi dan menggabungkan data dari multiple external APIs, memberikan fondasi solid untuk building modern backend applications.

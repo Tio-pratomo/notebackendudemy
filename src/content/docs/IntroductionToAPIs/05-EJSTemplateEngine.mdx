@@ -1,0 +1,591 @@
+---
+title: "Introduction to EJS Template Engine"
+---
+
+Setelah mempelajari API integration secara mendalam di sesi 2.1-2.4, sekarang kita akan belajar bagaimana menampilkan data dari API ke frontend menggunakan **EJS (Embedded JavaScript)** - template engine yang powerful dan mudah digunakan untuk Express.js.
+
+## Apa itu Template Engine?
+
+**Template engine** adalah tool yang memungkinkan kita menggunakan static template files dalam aplikasi. Pada runtime, template engine mengganti variables dalam template file dengan nilai actual dan mengubah template menjadi HTML file yang dikirim ke client. Ini memungkinkan desain halaman HTML menjadi lebih mudah karena bisa menggunakan variable, conditional logic, dan loops.
+
+### Mengapa Perlu Template Engine?
+
+Tanpa template engine, kita harus mengirim HTML sebagai string dari route handler:
+
+```javascript
+app.get("/users", (req, res) => {
+  const users = ["Alice", "Bob", "Charlie"];
+
+  let html = "<html><body><h1>Users</h1><ul>";
+  users.forEach((user) => {
+    html += `<li>${user}</li>`;
+  });
+  html += "</ul></body></html>";
+
+  res.send(html);
+});
+```
+
+Ini tidak maintainable untuk aplikasi besar dan mixing HTML dengan JavaScript code membuat kode sulit dibaca.
+
+## Apa itu EJS?
+
+**EJS (Embedded JavaScript)** adalah template engine yang memungkinkan kita generate HTML markup dengan plain JavaScript. EJS adalah salah satu template engine paling populer untuk Express.js karena syntax-nya yang simple dan familiar bagi developer JavaScript.
+
+### Karakteristik EJS
+
+**Simple syntax** - Menggunakan plain JavaScript di dalam template, tidak perlu belajar syntax baru yang kompleks.
+
+**Fast compilation** - EJS compile cepat dan efficient untuk production use.
+
+**Flexible** - Support partials, layouts, dan custom delimiters.
+
+**No dependencies** - Standalone library tanpa external dependencies.
+
+**Active community** - Well-maintained dengan dokumentasi yang baik.
+
+## Instalasi dan Setup EJS
+
+### 1. Install EJS Package
+
+```bash
+npm install ejs
+```
+
+### 2. Konfigurasi Express
+
+```javascript
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+
+// Set EJS sebagai view engine
+app.set("view engine", "ejs");
+
+// Set folder untuk views (default: 'views')
+app.set("views", path.join(__dirname, "views"));
+
+// Bisa juga set custom folder
+// app.set('views', path.join(__dirname, 'templates'));
+```
+
+### 3. Struktur Folder
+
+```
+project/
+├── views/
+│   ├── pages/
+│   │   ├── index.ejs
+│   │   ├── about.ejs
+│   │   └── contact.ejs
+│   ├── partials/
+│   │   ├── header.ejs
+│   │   ├── footer.ejs
+│   │   └── navbar.ejs
+│   └── layouts/
+│       └── main.ejs
+├── public/
+│   ├── css/
+│   └── js/
+├── index.js
+└── package.json
+```
+
+## Basic EJS Syntax
+
+EJS menggunakan tag khusus untuk embed JavaScript dalam HTML:
+
+### 1. Output Tag: `<%= %>`
+
+Digunakan untuk **output value** (HTML escaped untuk prevent XSS):
+
+```html
+<h1>Welcome, <%= userName %>!</h1>
+<p>Your email: <%= userEmail %></p>
+```
+
+Output:
+
+```html
+<h1>Welcome, John!</h1>
+<p>Your email: john@example.com</p>
+```
+
+### 2. Unescaped Output Tag: `<%- %>`
+
+Digunakan untuk **output raw HTML** (tidak di-escape):
+
+```html
+<!-- htmlContent = "<strong>Bold Text</strong>" -->
+<%- htmlContent %>
+```
+
+Output:
+
+```html
+<strong>Bold Text</strong>
+```
+
+**Warning**: Gunakan dengan hati-hati untuk mencegah XSS attacks.
+
+### 3. Scriptlet Tag: `<% %>`
+
+Digunakan untuk **control flow** (tidak menghasilkan output):
+
+```html
+<% if (isLoggedIn) { %>
+<p>Welcome back!</p>
+<% } else { %>
+<p>Please login</p>
+<% } %>
+```
+
+### 4. Comment Tag: `<%# %>`
+
+Digunakan untuk **comments** (tidak ditampilkan di output):
+
+```html
+<%# This is a comment, won't appear in HTML %>
+<p>Visible content</p>
+```
+
+## Rendering EJS Templates
+
+### Basic Rendering
+
+```javascript
+app.get("/", (req, res) => {
+  // Render views/index.ejs
+  res.render("index");
+});
+```
+
+### Rendering dengan Data
+
+```javascript
+app.get("/profile", (req, res) => {
+  const user = {
+    name: "John Doe",
+    email: "john@example.com",
+    age: 30,
+    hobbies: ["reading", "coding", "gaming"],
+  };
+
+  // Pass data ke template
+  res.render("profile", { user: user });
+
+  // Atau dengan shorthand
+  res.render("profile", { user });
+});
+```
+
+### Template: views/profile.ejs
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - <%= user.name %></title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>User Profile</h1>
+
+      <!-- Output simple values -->
+      <div class="profile-info">
+        <p><strong>Name:</strong> <%= user.name %></p>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Age:</strong> <%= user.age %></p>
+      </div>
+
+      <!-- Conditional rendering -->
+      <% if (user.age >= 18) { %>
+      <p class="badge">Adult</p>
+      <% } else { %>
+      <p class="badge">Minor</p>
+      <% } %>
+
+      <!-- Loop through array -->
+      <h2>Hobbies</h2>
+      <ul>
+        <% user.hobbies.forEach(hobby => { %>
+        <li><%= hobby %></li>
+        <% }); %>
+      </ul>
+    </div>
+  </body>
+</html>
+```
+
+## Conditional Logic dalam EJS
+
+### If-Else Statement
+
+```html
+<% if (role === 'admin') { %>
+<button>Delete User</button>
+<button>Edit Settings</button>
+<% } else if (role === 'moderator') { %>
+<button>Edit Content</button>
+<% } else { %>
+<p>Limited Access</p>
+<% } %>
+```
+
+### Ternary Operator
+
+```html
+<p class="<%= isActive ? 'status-active' : 'status-inactive' %>">
+  <%= isActive ? 'Active' : 'Inactive' %>
+</p>
+```
+
+### Logical Operators
+
+```html
+<% if (user && user.isPremium) { %>
+<div class="premium-badge">Premium Member</div>
+<% } %> <% if (!user) { %>
+<a href="/login">Login</a>
+<% } %>
+```
+
+## Loops dalam EJS
+
+### forEach Loop
+
+```html
+<h2>Products</h2>
+<div class="products">
+  <% products.forEach(product => { %>
+  <div class="product-card">
+    <h3><%= product.name %></h3>
+    <p>Price: $<%= product.price %></p>
+    <p><%= product.description %></p>
+  </div>
+  <% }); %>
+</div>
+```
+
+### for Loop dengan Index
+
+```html
+<ol>
+  <% for (let i = 0; i < items.length; i++) { %>
+  <li>Item #<%= i + 1 %>: <%= items[i] %></li>
+  <% } %>
+</ol>
+```
+
+### map() untuk Transform Data
+
+```html
+<% const productNames = products.map(p => p.name); const totalPrice =
+products.reduce((sum, p) => sum + p.price, 0); %>
+
+<p>Products: <%= productNames.join(', ') %></p>
+<p>Total: $<%= totalPrice %></p>
+```
+
+## Working dengan Objects dan Arrays
+
+### Complex Data Structures
+
+```javascript
+app.get("/dashboard", (req, res) => {
+  const data = {
+    user: {
+      name: "John Doe",
+      avatar: "/images/avatar.jpg",
+    },
+    stats: {
+      posts: 45,
+      followers: 1234,
+      following: 567,
+    },
+    recentPosts: [
+      { id: 1, title: "First Post", likes: 10 },
+      { id: 2, title: "Second Post", likes: 25 },
+      { id: 3, title: "Third Post", likes: 15 },
+    ],
+  };
+
+  res.render("dashboard", data);
+});
+```
+
+### Template: views/dashboard.ejs
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard - <%= user.name %></title>
+  </head>
+  <body>
+    <header>
+      <img src="<%= user.avatar %>" alt="Avatar" />
+      <h1><%= user.name %></h1>
+    </header>
+
+    <section class="stats">
+      <div class="stat-item">
+        <span class="number"><%= stats.posts %></span>
+        <span class="label">Posts</span>
+      </div>
+      <div class="stat-item">
+        <span class="number"><%= stats.followers %></span>
+        <span class="label">Followers</span>
+      </div>
+      <div class="stat-item">
+        <span class="number"><%= stats.following %></span>
+        <span class="label">Following</span>
+      </div>
+    </section>
+
+    <section class="recent-posts">
+      <h2>Recent Posts</h2>
+
+      <% if (recentPosts.length === 0) { %>
+      <p>No posts yet</p>
+      <% } else { %> <% recentPosts.forEach(post => { %>
+      <article class="post">
+        <h3><%= post.title %></h3>
+        <p>❤️ <%= post.likes %> likes</p>
+        <a href="/posts/<%= post.id %>">Read more</a>
+      </article>
+      <% }); %> <% } %>
+    </section>
+  </body>
+</html>
+```
+
+## JavaScript Functions dalam EJS
+
+### Helper Functions
+
+```html
+<% // Define helper function function formatDate(date) { return new
+Date(date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day:
+'numeric' }); } function truncate(text, length) { return text.length > length ?
+text.substring(0, length) + '...' : text; } %> <% posts.forEach(post => { %>
+<article>
+  <h2><%= post.title %></h2>
+  <p class="date"><%= formatDate(post.createdAt) %></p>
+  <p><%= truncate(post.content, 150) %></p>
+</article>
+<% }); %>
+```
+
+## Practical Example: Blog Post Listing
+
+### Server Code: index.js
+
+```javascript
+import express from "express";
+import axios from "axios";
+
+const app = express();
+
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+
+app.get("/blog", async (req, res) => {
+  try {
+    // Fetch posts from API
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/posts"
+    );
+    const posts = response.data.slice(0, 10); // Get first 10 posts
+
+    // Fetch users for author info
+    const usersResponse = await axios.get(
+      "https://jsonplaceholder.typicode.com/users"
+    );
+    const users = usersResponse.data;
+
+    // Create user map for quick lookup
+    const userMap = {};
+    users.forEach((user) => {
+      userMap[user.id] = user;
+    });
+
+    // Render template with data
+    res.render("blog", {
+      posts: posts,
+      users: userMap,
+      pageTitle: "My Blog",
+    });
+  } catch (error) {
+    res.status(500).render("error", {
+      error: "Failed to load blog posts",
+    });
+  }
+});
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+```
+
+### Template: views/blog.ejs
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %></title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .post {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .post-title {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .post-author {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 15px;
+      }
+      .post-body {
+        color: #444;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><%= pageTitle %></h1>
+      <p>Showing <%= posts.length %> recent posts</p>
+    </header>
+
+    <main>
+      <% if (posts.length === 0) { %>
+      <div class="no-posts">
+        <p>No blog posts available at the moment.</p>
+      </div>
+      <% } else { %> <% posts.forEach((post, index) => { %>
+      <article class="post">
+        <h2 class="post-title"><%= index + 1 %>. <%= post.title %></h2>
+
+        <p class="post-author">
+          By <%= users[post.userId] ? users[post.userId].name : 'Unknown' %> <%
+          if (users[post.userId]) { %> (<%= users[post.userId].email %>) <% } %>
+        </p>
+
+        <p class="post-body"><%= post.body %></p>
+
+        <% if (post.id % 2 === 0) { %>
+        <span class="badge">Featured</span>
+        <% } %>
+      </article>
+      <% }); %> <% } %>
+    </main>
+
+    <footer>
+      <p>
+        &copy; <%= new Date().getFullYear() %> My Blog. All rights reserved.
+      </p>
+    </footer>
+  </body>
+</html>
+```
+
+## EJS vs Other Template Engines
+
+### EJS vs Pug (Jade)
+
+**EJS**:
+
+- Syntax mirip HTML, mudah dipelajari
+- Write plain JavaScript
+- More verbose
+
+**Pug**:
+
+- Syntax singkat tanpa closing tags
+- Custom syntax yang harus dipelajari
+- More concise
+
+### EJS vs Handlebars
+
+**EJS**:
+
+- Full JavaScript logic dalam templates
+- Lebih flexible
+- Bisa kompleks untuk logic berat
+
+**Handlebars**:
+
+- Logic-less templates (minimal logic)
+- Menggunakan helpers untuk logic
+- Lebih clean tapi kurang flexible
+
+## Best Practices
+
+**Keep logic minimal** - Template seharusnya untuk presentation, bukan business logic. Move complex logic ke controller.
+
+**Use meaningful variable names** - Gunakan nama yang descriptive untuk data yang di-pass ke template.
+
+**Avoid deep nesting** - Nested conditionals dan loops membuat template sulit dibaca. Consider breaking into partials.
+
+**Escape user input** - Gunakan `<%= %>` bukan `<%- %>` untuk user-generated content untuk prevent XSS.
+
+**Use comments** - Document complex logic dengan `<%# %>` comments.
+
+**Separate concerns** - Business logic di controller, presentation logic di views, styling di CSS.
+
+**Performance** - Cache compiled templates di production dengan `app.set('view cache', true)`.
+
+## Common Pitfalls
+
+**Forgetting to pass data** - Jika variable tidak di-pass dari controller, akan error `variable is not defined`.
+
+```javascript
+// ❌ Bad - forgot to pass userName
+res.render("profile");
+
+// ✅ Good - pass all needed data
+res.render("profile", { userName: "John" });
+```
+
+**Using wrong tag** - `<%= %>` vs `<%- %>` vs `<% %>` memiliki fungsi berbeda.
+
+**Undefined variables** - Selalu check apakah variable exists sebelum mengakses property.
+
+```html
+<!-- ❌ Bad - will error if user is undefined -->
+<p><%= user.name %></p>
+
+<!-- ✅ Good - safe check -->
+<% if (user && user.name) { %>
+<p><%= user.name %></p>
+<% } %>
+```
+
+---
+
+**Ringkasan**: EJS (Embedded JavaScript) adalah template engine yang powerful dan mudah digunakan untuk Express.js yang memungkinkan generate HTML dengan plain JavaScript syntax. Dengan tag `<%= %>` untuk output, `<% %>` untuk control flow, dan `<%- %>` untuk raw HTML, EJS menyediakan cara yang clean dan maintainable untuk render dynamic content. Template dapat menerima data dari controller melalui `res.render()`, mendukung conditional logic, loops, dan JavaScript functions untuk data transformation. Best practices meliputi keeping templates simple, separating business logic dari presentation, dan properly escaping user input untuk security. EJS adalah excellent choice untuk developers yang ingin template engine dengan minimal learning curve karena menggunakan JavaScript yang sudah familiar.

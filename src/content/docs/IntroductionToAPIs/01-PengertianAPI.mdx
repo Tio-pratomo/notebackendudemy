@@ -1,0 +1,402 @@
+---
+title: "Introduction to APIs"
+---
+
+Kita mulai Introduction to APIs, yang fokus pada EJS Templating dan API
+Integration. Kita akan mulai dengan memahami konsep fundamental tentang API -
+teknologi yang memungkinkan aplikasi web modern untuk berkomunikasi dengan
+layanan eksternal dan berbagi data antar sistem.
+
+## Apa itu API?
+
+**API** adalah singkatan dari **Application Programming Interface** (Antarmuka
+Pemrograman Aplikasi). API berfungsi sebagai penerjemah atau jembatan yang
+memungkinkan dua program berbeda berkomunikasi satu sama lain, meskipun mereka
+"berbicara" dalam bahasa atau teknologi yang berbeda.
+
+### Analogi Sederhana
+
+Bayangkan kamu memiliki dua teman: satu dari Tiongkok yang hanya berbahasa
+Mandarin, dan satu dari Jepang yang hanya berbahasa Jepang. Mereka ingin bekerja
+sama dalam sebuah proyek, tetapi tidak bisa berkomunikasi langsung.
+
+Di sinilah peran **penerjemah** menjadi sangat penting. Penerjemah akan
+mendengarkan apa yang dikatakan teman Mandarin, menerjemahkannya ke bahasa
+Jepang, dan menyampaikannya ke teman Jepang, begitu pula sebaliknya.
+
+**API adalah penerjemah tersebut**. API menyediakan seperangkat aturan dan
+protokol yang harus diikuti oleh kedua program agar mereka bisa saling mengerti
+dan berinteraksi.
+
+## Contoh Penggunaan API dalam Kehidupan Sehari-hari
+
+### 1. Aplikasi Cuaca Otomatis
+
+Ketika membuat website buku harian yang menampilkan ikon cuaca secara otomatis,
+kita menggunakan API dari penyedia data cuaca seperti **OpenWeather**.
+
+**Bagaimana API bekerja**:
+
+- API memberitahu **data apa yang bisa didapatkan**: suhu, jenis cuaca (hujan,
+  cerah, berawan), kelembaban, dll
+- API memberitahu **cara memintanya**: dengan memberikan koordinat lokasi
+  (latitude dan longitude)
+- API memberitahu **struktur data yang akan diterima**: format JSON dengan field
+  seperti "temperature", "weather_description", "icon"
+
+Dengan API, website buku harian bisa **meminta** data cuaca dari server
+OpenWeather, dan OpenWeather akan **mengirimkan** data tersebut kembali secara
+otomatis.
+
+### 2. Integrasi Email Marketing dengan Mailchimp
+
+Saat memiliki website dan ingin mengumpulkan email subscribers untuk newsletter,
+kita menggunakan **API Mailchimp**.
+
+**API Mailchimp mendefinisikan**:
+
+- **Bagaimana mengirimkan data (email) ke mereka**: menggunakan permintaan POST
+- **Respons apa yang bisa diharapkan**: konfirmasi sukses atau error message
+
+API Mailchimp berfungsi sebagai panduan jelas tentang bagaimana mengirimkan data
+email dari website ke database Mailchimp.
+
+### 3. IoT - Penyiram Tanaman Otomatis via Twitter
+
+**Contoh advanced:** perangkat penyiram tanaman yang terhubung internet bisa
+diaktifkan melalui tweet.
+
+**Cara kerjanya**:
+
+- **API Twitter** memberitahu program ketika ada tweet yang dikirimkan ke akun
+  tertentu
+- **API perangkat penyiram** menerima perintah dari program untuk mengaktifkan
+  mekanisme penyiraman
+- API perangkat bahkan bisa memberikan respons seperti jumlah air yang
+  dikeluarkan atau kadar air tanah saat ini
+
+Ini menunjukkan fleksibilitas API dalam menghubungkan berbagai jenis software,
+bahkan dengan hardware.
+
+## REST API: Gaya Arsitektur yang Paling Populer
+
+Ada berbagai gaya arsitektur dalam membangun API seperti GraphQL, SOAP, REST,
+gRPC, dan banyak lagi. Setiap jenis memiliki seperangkat aturan dan cara kerja
+yang berbeda, seperti gaya arsitektur rumah (klasik, modern, minimalis).
+
+### Mengapa Fokus pada REST API?
+
+**RESTful API** adalah jenis API yang paling populer untuk pengembangan web
+karena sangat cocok untuk berinteraksi dengan web. REST mengikuti seperangkat
+aturan tertentu, dan aturan paling penting adalah menggunakan **Protokol HTTP**
+untuk berinteraksi.
+
+### HTTP Methods dalam REST API
+
+REST API menggunakan HTTP methods yang sudah kita pelajari di Sesi 1.3:
+
+- **GET** - Mengambil atau mendapatkan data (seperti mendapatkan data cuaca)
+- **POST** - Mengirim atau membuat data baru (seperti mengirim email ke
+  Mailchimp)
+- **PUT** - Memperbarui data secara keseluruhan
+- **PATCH** - Memperbarui sebagian kecil data
+- **DELETE** - Menghapus data
+
+Karena sudah memahami HTTP methods, kita memiliki fondasi kuat untuk bekerja
+dengan REST API.
+
+## Format Data JSON
+
+**JSON** (JavaScript Object Notation) adalah format data standar yang digunakan
+oleh REST API untuk bertukar informasi. JSON dirancang agar mudah dibaca oleh
+manusia dan efisien saat dikirimkan melalui internet.
+
+### Struktur JSON
+
+JSON menggunakan pasangan **key-value** (kunci-nilai):
+
+```json
+{
+  "nama": "Ayam Goreng",
+  "bahan": {
+    "ayam": "1 ekor",
+    "bumbu": {
+      "bawangPutih": "3 siung",
+      "garam": "1 sendok teh"
+    }
+  }
+}
+```
+
+**Aturan penting**: Di JSON, kunci (keys) **selalu harus menggunakan tanda kutip
+ganda** (""). Ini berbeda dengan JavaScript Object yang lebih fleksibel.
+
+### JSON vs JavaScript Object
+
+**JavaScript Object** (lebih santai):
+
+```javascript
+const resepAyam = {
+  nama: "Ayam Goreng",
+  bahan: {
+    ayam: "1 ekor",
+  },
+};
+```
+
+**JSON** (lebih ketat, untuk transfer data):
+
+```json
+{
+  "nama": "Ayam Goreng",
+  "bahan": {
+    "ayam": "1 ekor"
+  }
+}
+```
+
+### Analogi IKEA: JSON sebagai Flat-Pack
+
+JSON seperti **lemari IKEA dalam kemasan datar (flat-pack)**:
+
+- **JavaScript Object** = Lemari yang sudah dirakit (besar, lengkap, siap pakai
+  di program)
+- **JSON** = Lemari dalam kemasan datar (ringkas, mudah dikirim melalui
+  internet)
+
+Ketika data JSON sampai di tujuan, program bisa "merakitnya" kembali menjadi
+JavaScript Object yang siap pakai. Inilah efisiensi JSON untuk transfer data.
+
+### Serialisasi dan Deserialisasi
+
+**1. Serialisasi - JSON.stringify()**
+
+Mengubah JavaScript Object menjadi JSON string (mengemas datar lemari):
+
+```javascript
+const user = {
+  name: "John Doe",
+  email: "john@example.com",
+  age: 30,
+};
+
+// Serialize: Object → JSON string
+const jsonString = JSON.stringify(user);
+console.log(jsonString);
+// Output: '{"name":"John Doe","email":"john@example.com","age":30}'
+```
+
+**2. Deserialisasi - JSON.parse()**
+
+Mengubah JSON string menjadi JavaScript Object (merakit kembali lemari):
+
+```javascript
+const jsonString = '{"name":"John Doe","email":"john@example.com","age":30}';
+
+// Deserialize: JSON string → Object
+const user = JSON.parse(jsonString);
+console.log(user.name); // Output: "John Doe"
+console.log(user.email); // Output: "john@example.com"
+```
+
+### JSON Visualizer
+
+Untuk data JSON yang kompleks, gunakan **JSON Visualizer** - tool online yang
+menampilkan JSON dalam format yang rapi dengan indentasi dan struktur yang bisa
+dikembangkan/disembunyikan. Ini seperti instruksi perakitan IKEA yang
+interaktif.
+
+## Praktik: Menggunakan Public API
+
+### Latihan dengan ISS Location API
+
+Mari kita praktik menggunakan API publik "Where the ISS at?" yang memberikan
+lokasi real-time dari International Space Station (ISS).
+
+### Membaca Dokumentasi API
+
+Setiap API memiliki **dokumentasi** yang seperti menu restoran:
+
+- **URL apa yang perlu diakses** untuk berinteraksi dengan API (daftar hidangan)
+- **Respons seperti apa yang bisa diharapkan** dari API (deskripsi hidangan)
+- **Data apa yang bisa didapatkan** dari setiap endpoint (detail hidangan)
+
+### Testing dengan Postman
+
+**Postman** adalah aplikasi untuk menguji API tanpa perlu membuat aplikasi
+kompleks. Selain postman, ada banyak aplikasi serupa yang gratis, seperti
+insomnia, bruno, dan lain-lain.
+
+**Langkah-langkah**:
+
+1. **Install Postman** dari website resmi atau gunakan web version
+2. **Baca dokumentasi API** "Where the ISS at?" untuk menemukan endpoint
+3. **Buat request GET**:
+   - URL: `https://api.wheretheiss.at/v1/satellites/25544`
+   - Method: GET
+   - ID 25544 adalah ID untuk ISS
+4. **Kirim request** dengan klik tombol "Send"
+
+### Menganalisis Response
+
+Setelah mengirim request, Postman akan menampilkan response dalam format JSON:
+
+```json
+{
+  "name": "iss",
+  "id": 25544,
+  "latitude": -3.123,
+  "longitude": 107.456,
+  "altitude": 420.5,
+  "velocity": 27500,
+  "visibility": "daylight",
+  "timestamp": 1699876543
+}
+```
+
+**Field penting**:
+
+- `latitude` - Garis lintang ISS
+- `longitude` - Garis bujur ISS
+- `altitude` - Ketinggian dari permukaan bumi (km)
+- `velocity` - Kecepatan ISS (km/jam)
+
+### Visualisasi di Google Maps
+
+Setelah mendapat koordinat dari API:
+
+1. Copy nilai `latitude` dan `longitude`
+2. Buka Google Maps
+3. Di search box, ketik: `-3.123, 107.456` (format: latitude, longitude)
+4. Tekan Enter - Google Maps akan menampilkan pin di lokasi ISS saat ini
+
+**ISS bergerak sangat cepat! Jika terus-menerus mengirim request dan memperbarui
+lokasi di Google Maps, akan terlihat ISS melayang di atas Bumi.**
+
+## Contoh API Publik Lainnya
+
+### 1. OpenWeather API
+
+```
+https://api.openweathermap.org/data/2.5/weather?q=Jakarta&appid=YOUR_API_KEY
+```
+
+Response:
+
+```json
+{
+  "main": {
+    "temp": 30.5,
+    "humidity": 75
+  },
+  "weather": [
+    {
+      "main": "Clouds",
+      "description": "scattered clouds"
+    }
+  ]
+}
+```
+
+### 2. JSONPlaceholder (Fake API untuk Testing)
+
+```
+https://jsonplaceholder.typicode.com/posts/1
+```
+
+Response:
+
+```json
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat",
+  "body": "quia et suscipit..."
+}
+```
+
+### 3. Random User API
+
+```
+https://randomuser.me/api/
+```
+
+Response:
+
+```json
+{
+  "results": [
+    {
+      "name": {
+        "first": "John",
+        "last": "Doe"
+      },
+      "email": "john.doe@example.com"
+    }
+  ]
+}
+```
+
+## Konsep Penting API
+
+### 1. Endpoint
+
+**Endpoint** adalah URL spesifik yang menerima request API. Seperti alamat rumah
+yang berbeda dalam satu kompleks:
+
+```
+https://api.example.com/users          - Get all users
+https://api.example.com/users/123      - Get user with ID 123
+https://api.example.com/posts          - Get all posts
+https://api.example.com/posts/456      - Get post with ID 456
+```
+
+### 2. Request dan Response
+
+**Request** = Permintaan dari client ke server
+
+- Method (GET, POST, PUT, DELETE)
+- URL/Endpoint
+- Headers (metadata)
+- Body (data yang dikirim, untuk POST/PUT)
+
+**Response** = Balasan dari server ke client
+
+- Status code (200, 404, 500)
+- Headers (metadata)
+- Body (data dalam format JSON)
+
+### 3. API Key
+
+Banyak API memerlukan **API Key** untuk autentikasi dan tracking usage. API key
+seperti kunci rumah yang memberikan akses ke layanan API.
+
+```
+https://api.example.com/data?apiKey=YOUR_SECRET_KEY
+```
+
+## Best Practices Menggunakan API
+
+**Baca dokumentasi dengan teliti**: Dokumentasi adalah sumber truth untuk cara
+menggunakan API dengan benar.
+
+**Handle errors dengan baik**: Selalu check status code dan handle error
+responses.
+
+**Jangan expose API keys**: Simpan API keys di environment variables, jangan
+hardcode di kode.
+
+**Respect rate limits**: Banyak API membatasi jumlah request per waktu tertentu.
+
+**Cache responses**: Simpan response yang jarang berubah untuk mengurangi API
+calls.
+
+---
+
+**Ringkasan**: API adalah jembatan komunikasi antar aplikasi yang memungkinkan
+berbagi data dan fungsionalitas. REST API menggunakan HTTP methods dan JSON
+sebagai format data standar. JSON adalah format data ringan yang mudah dibaca
+manusia dan efisien untuk transfer melalui internet, dengan proses serialisasi
+(JSON.stringify()) dan deserialisasi (JSON.parse()). Memahami konsep API,
+endpoint, request-response cycle, dan format JSON adalah fondasi penting untuk
+bekerja dengan modern web development dan integrasi layanan eksternal.

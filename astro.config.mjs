@@ -15,7 +15,7 @@ export default defineConfig({
         {
           label: "Express.js dan Backend Fundamentals",
           collapsed: true,
-          autogenerate: { directory: "Express.js`DanBackendFundamentals" },
+          autogenerate: { directory: "Express.jsDanBackendFundamentals" },
         },
         {
           label: "Introduction to APIs",

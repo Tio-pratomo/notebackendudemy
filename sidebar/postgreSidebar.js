@@ -1,23 +1,23 @@
 import { generateSession } from "../generateSession";
 
-export const expressSidebar = {
-  label: "Express.js & Backend Foundations",
+export const postgreSidebar = {
+  label: "PostgreSQL",
   collapsed: true,
   items: [
     {
       label: "Chapter I",
       collapsed: true,
-      items: generateSession(4, "expressjs"),
+      items: generateSession(4, "postgre"),
     },
     {
       label: "Chapter II",
       collapsed: true,
-      items: generateSession(4, "expressjs", 4),
+      items: generateSession(4, "postgre", 4),
     },
     {
       label: "Chapter III",
       collapsed: true,
-      items: generateSession(6, "expressjs", 8),
+      items: generateSession(4, "postgre", 8),
     },
   ],
 };

@@ -96,7 +96,7 @@ app.get("/", (req, res) => {
     title: "Selamat Datang di Sesi 8",
     currentYear: new Date().getFullYear(),
     serverTime: new Date().toLocaleString("id-ID"),
-    president: "Donald Trump",
+    president: "Prabowo Subianto",
   };
 
   res.render("index", serverInfo);
@@ -169,9 +169,7 @@ app.listen(port, () => {
 </html>
 ```
 
-**views/about.ejs:**
-
-```html wrap
+```html wrap title="views/about.ejs"
 <!DOCTYPE html>
 <html lang="id">
   <head>

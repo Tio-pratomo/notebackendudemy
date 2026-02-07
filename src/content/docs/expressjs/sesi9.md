@@ -43,7 +43,7 @@ Kita akan menggunakan package `express-ejs-layouts` untuk fitur ini.
 
 ### 4. Sintaks Include Partials
 
-```ejs
+```js
 <%- include('partials/header') %>
 ```
 

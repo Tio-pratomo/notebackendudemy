@@ -112,7 +112,7 @@ npm install --save-dev nodemon
 
 ### Langkah 4: Buat File .env
 
-```env wrap
+```text wrap
 PORT=3000
 NODE_ENV=development
 APP_NAME=Personal Blog

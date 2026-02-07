@@ -13,7 +13,7 @@ Dalam database relasional seperti PostgreSQL, ada tiga pola relasi utama:
 
 - **One-to-Many / Many-to-One**:
   - Satu baris di tabel A bisa punya **banyak** baris terkait di tabel B.
-  - Contoh: satu `user` punya banyak `posts` (yang sudah kita buat di Sesi 23).
+  - Contoh: satu `user` punya banyak `posts` (yang sudah kita buat di Sesi 3).
   - Implementasi: foreign key di tabel “many” (`posts.user_id` references
     `users.id`).
 

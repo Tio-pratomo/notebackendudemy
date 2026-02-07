@@ -34,7 +34,7 @@ Kita lanjut di project `blog-api` dengan struktur `db/`, `repositories/`,
 
 ### 1. Endpoint: Detail Post Lengkap (author + tags)
 
-Repository sudah kita punya (`getPostWithTags` di Sesi 27). Kita ulang ringkas
+Repository sudah kita punya (`getPostWithTags` di Sesi 7). Kita ulang ringkas
 dan sedikit refine.
 
 #### 1A. Pastikan repository `getPostWithTags` sudah seperti ini
@@ -350,7 +350,7 @@ export async function getOverviewStats() {
 ```
 
 Semua query di atas adalah bentuk langsung dari latihan aggregate/joins di Sesi
-31, sekarang dikemas jadi satu fungsi repository.
+11, sekarang dikemas jadi satu fungsi repository.
 
 #### 3B. Controller & routes
 
@@ -431,7 +431,7 @@ Respons akan berisi JSON seperti:
 
 Dengan **Sesi 12** ini, kamu sudah:
 
-- Melihat secara lengkap bagaimana **SQL JOIN & agregasi** dari Sesi 31
+- Melihat secara lengkap bagaimana **SQL JOIN & agregasi** dari Sesi sebelumnya
   diterapkan di Node‑Postgres & Express.
 - Punya endpoint “realistic” yang memanfaatkan relasi one‑to‑many dan
   many‑to‑many:

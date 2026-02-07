@@ -70,7 +70,7 @@ router.get("/protected", controller.getProtected); // Route terproteksi
 
 ## Praktik
 
-Kita akan refactor Blog API dari Sesi 15 dan menambahkan Jokes API sebagai
+Kita akan refactor Blog API dari Sesi pertama dan menambahkan Jokes API sebagai
 contoh kedua.
 
 ### Langkah 1: Restructure Project
@@ -894,7 +894,7 @@ npm run dev
 
 **Test Endpoints:**
 
-**Posts (masih sama seperti Sesi 15):**
+**Posts (masih sama seperti Sesi pertama):**
 
 ```
 GET  http://localhost:4000/api/v1/posts
@@ -947,4 +947,4 @@ DELETE http://localhost:4000/api/v1/jokes/1
 
 **Selamat!** Kode Anda sekarang production-ready dan siap untuk scaling. Di
 **Sesi 5-7**, tentang RESTful API, kita akan explore lebih dalam tentang
-middleware, CORS, dan rate limiting sebelum masuk ke PostgreSQL di Sesi 21.
+middleware, CORS, dan rate limiting sebelum masuk ke PostgreSQL.

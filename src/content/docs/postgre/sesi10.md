@@ -85,7 +85,7 @@ kita definisikan.
 
 Di `.env` (blog-api):
 
-```env
+```text
 DATABASE_URL=postgresql://blog_user:password_dev@localhost:5432/blog_db
 ```
 
